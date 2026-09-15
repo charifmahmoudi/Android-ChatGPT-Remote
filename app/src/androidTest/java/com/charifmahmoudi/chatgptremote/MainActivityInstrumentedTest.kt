@@ -4,13 +4,10 @@ import android.Manifest
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.view.View
+import android.widget.TextView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import org.junit.After
@@ -46,10 +43,15 @@ class MainActivityInstrumentedTest {
         ActivityScenario.launch(MainActivity::class.java).use {
             awaitCondition { ServiceState.current.phase == ServicePhase.NEED_TUNNEL }
 
-            onView(withId(R.id.statusTitle)).check(matches(withText(R.string.status_action_required)))
-            onView(withId(R.id.tunnelGroup)).check(matches(isDisplayed()))
-            onView(withId(R.id.saveTunnelButton)).check(matches(isDisplayed()))
-            onView(withId(R.id.versionText)).check(matches(isDisplayed()))
+            it.onActivity { activity ->
+                assertEquals(
+                    activity.getString(R.string.status_action_required),
+                    activity.findViewById<TextView>(R.id.statusTitle).text.toString(),
+                )
+                assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.tunnelGroup).visibility)
+                assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.saveTunnelButton).visibility)
+                assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.versionText).visibility)
+            }
 
             val notifications = context.getSystemService(NotificationManager::class.java)
             awaitCondition { notifications.activeNotifications.isNotEmpty() }

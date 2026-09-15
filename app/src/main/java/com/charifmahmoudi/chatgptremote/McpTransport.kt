@@ -10,6 +10,10 @@ interface McpTransport {
     suspend fun terminate(headers: Map<String, List<String>>): McpResult
 }
 
+interface AdbTransport : McpTransport {
+    suspend fun probe()
+}
+
 /**
  * Embedded, stateless MCP server backed directly by Android's paired wireless adbd.
  *
@@ -21,9 +25,9 @@ class AdbMcpTransport(
     private val port: Int,
     private val onDiagnostic: (String) -> Unit = {},
     private val onHealthChanged: (Boolean, String) -> Unit = { _, _ -> },
-) : McpTransport {
+) : AdbTransport {
     /** Verifies the actual adbd socket and shell service before the tunnel is advertised as ready. */
-    suspend fun probe() = withContext(Dispatchers.IO) {
+    override suspend fun probe() = withContext(Dispatchers.IO) {
         onDiagnostic("probe start")
         try {
             Kadb.create(host, port).use { it.shell("id") }

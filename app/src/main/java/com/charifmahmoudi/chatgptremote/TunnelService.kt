@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 /** Owns the complete background lifecycle: configuration, pairing, tunnel polling, and MCP. */
 class TunnelService : LifecycleService() {
     private val secureConfig by lazy { SecureConfig(this) }
-    private var tunnelClient: TunnelClient? = null
+    private var tunnelClient: TunnelRunner? = null
     private var worker: Job? = null
     @Volatile private var tunnelConnected = false
     @Volatile private var adbHealthy = false
@@ -114,7 +114,7 @@ class TunnelService : LifecycleService() {
             tunnelConnected = false
             adbHealthy = false
             publish(ServicePhase.CONNECTING, "Checking local ADB before connecting the secure tunnel…")
-            val transport = AdbMcpTransport(
+            val transport = TunnelServiceDependencies.createAdbTransport(
                 config.adbHost,
                 config.adbPort,
                 onDiagnostic = { event -> DiagnosticLog.record("adb", event) },
@@ -131,7 +131,7 @@ class TunnelService : LifecycleService() {
             }
 
             publish(ServicePhase.CONNECTING, "Local ADB verified · connecting secure tunnel…")
-            val client = TunnelClient(
+            val client = TunnelServiceDependencies.createTunnelRunner(
                 baseUrl = OPENAI_API,
                 tunnelId = config.tunnelId,
                 apiKey = config.apiKey,

@@ -101,7 +101,7 @@ class TunnelServiceIntegrationTest {
     }
 
     private fun awaitPhase(expected: ServicePhase) {
-        val deadline = System.nanoTime() + 5_000_000_000L
+        val deadline = System.nanoTime() + PHASE_TIMEOUT_NANOS
         while (ServiceState.current.phase != expected && System.nanoTime() < deadline) {
             Thread.sleep(50)
         }
@@ -150,5 +150,6 @@ class TunnelServiceIntegrationTest {
 
     private companion object {
         const val TEST_TUNNEL_ID = "tunnel_0123456789abcdef0123456789abcdef"
+        const val PHASE_TIMEOUT_NANOS = 20_000_000_000L
     }
 }

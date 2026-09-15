@@ -31,7 +31,7 @@ class ManifestSecurityInstrumentedTest {
             context.packageName,
             PackageManager.GET_SERVICES or PackageManager.GET_PERMISSIONS,
         )
-        val service = packageInfo.services.singleOrNull {
+        val service = packageInfo.services.orEmpty().singleOrNull {
             it.name == TunnelService::class.java.name
         }
 

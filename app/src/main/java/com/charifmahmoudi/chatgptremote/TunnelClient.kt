@@ -36,6 +36,11 @@ object TunnelJson {
     }
 }
 
+interface TunnelRunner {
+    suspend fun run()
+    fun stop()
+}
+
 /**
  * Outbound-only Secure MCP Tunnel client.
  *
@@ -52,7 +57,7 @@ class TunnelClient(
     private val onConnected: () -> Unit = {},
     private val onConnectionLost: () -> Unit = {},
     private val onDiagnostic: (String) -> Unit = {},
-) {
+) : TunnelRunner {
     init {
         require(TUNNEL_ID.matches(tunnelId)) { "Invalid tunnel ID" }
         require(apiKey.isNotBlank()) { "Runtime key is required" }
@@ -61,7 +66,7 @@ class TunnelClient(
     private val instanceId = UUID.randomUUID().toString()
     private var ownerJob: Job? = null
 
-    suspend fun run() = supervisorScope {
+    override suspend fun run() = supervisorScope {
         ownerJob = currentCoroutineContext().job
         val queue = Channel<ReceivedCommand>(capacity = COMMAND_QUEUE_CAPACITY)
         val workers = List(MAX_CONCURRENT_COMMANDS) { workerIndex ->
@@ -114,7 +119,7 @@ class TunnelClient(
         }
     }
 
-    fun stop() {
+    override fun stop() {
         ownerJob?.cancel()
     }
 

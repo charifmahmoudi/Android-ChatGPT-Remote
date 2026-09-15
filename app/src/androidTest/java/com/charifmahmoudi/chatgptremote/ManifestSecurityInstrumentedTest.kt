@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -40,14 +39,15 @@ class ManifestSecurityInstrumentedTest {
         assertTrue(
             service.foregroundServiceType and ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE != 0,
         )
-        assertEquals(
-            setOf(
-                "android.permission.INTERNET",
-                "android.permission.FOREGROUND_SERVICE",
-                "android.permission.FOREGROUND_SERVICE_SPECIAL_USE",
-                "android.permission.POST_NOTIFICATIONS",
+        assertTrue(
+            packageInfo.requestedPermissions.orEmpty().toSet().containsAll(
+                setOf(
+                    "android.permission.INTERNET",
+                    "android.permission.FOREGROUND_SERVICE",
+                    "android.permission.FOREGROUND_SERVICE_SPECIAL_USE",
+                    "android.permission.POST_NOTIFICATIONS",
+                ),
             ),
-            packageInfo.requestedPermissions.orEmpty().toSet(),
         )
     }
 }

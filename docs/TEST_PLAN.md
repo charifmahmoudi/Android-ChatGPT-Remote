@@ -45,7 +45,7 @@ These require protected integration testing or physical-device validation.
 | --- | --- | --- | --- |
 | Host JVM | Fast protocol and application-logic tests | Every push and pull request | Yes |
 | Android emulator | Framework, UI, storage, service, and notification tests | Every pull request | Yes |
-| Real-emulator ADB smoke test | Kadb interoperability with Android adbd | Main branch or scheduled | Initially non-blocking |
+| Real-emulator ADB smoke test | Kadb interoperability with Android adbd | Every push and pull request | Yes |
 | Protected live tunnel | End-to-end tunnel interoperability | Manual or scheduled | No |
 | Physical Android device | Pairing, lifecycle, networking, and OEM validation | Before a release | Yes |
 
@@ -212,7 +212,7 @@ external credentials.
 
 ## Real-emulator ADB smoke test
 
-A separate job may attempt to validate the actual Kadb-to-adbd path:
+The emulator job validates the actual Kadb-to-adbd path:
 
 1. Boot an Android 11+ emulator.
 2. Configure an isolated emulator ADB endpoint.
@@ -228,9 +228,9 @@ A separate job may attempt to validate the actual Kadb-to-adbd path:
 
 Never execute contributor-supplied shell text in this job. Do not expose ADB outside the CI runner.
 
-Emulator adbd and networking differ from a physical device. Keep this job non-blocking until it has
-demonstrated acceptable stability. If it remains flaky, run it on the default branch or a schedule
-and retain the deterministic integration suite as the pull-request gate.
+Emulator adbd and networking differ from a physical device, so this remains a smoke test rather
+than a substitute for the physical-device release gate. The CI identity is generated for each run,
+authorized only inside the disposable emulator, and never uses production credentials.
 
 ## Protected live-tunnel test
 

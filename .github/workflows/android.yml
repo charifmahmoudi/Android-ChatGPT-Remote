@@ -71,7 +71,20 @@ jobs:
           profile: pixel_2
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          script: gradle --no-daemon connectedDebugAndroidTest
+          script: |
+            ci_adb_key="${RUNNER_TEMP}/android-chatgpt-remote-ci-adb-key"
+            adb keygen "${ci_adb_key}"
+            adb pubkey "${ci_adb_key}" > "${ci_adb_key}.pub"
+            adb root
+            adb wait-for-device
+            adb push "${ci_adb_key}.pub" /data/local/tmp/android-chatgpt-remote-ci-adb-key.pub
+            adb shell 'cat /data/local/tmp/android-chatgpt-remote-ci-adb-key.pub >> /data/misc/adb/adb_keys'
+            adb shell chmod 640 /data/misc/adb/adb_keys
+            adb tcpip 5555
+            adb wait-for-device
+            ci_adb_private_key="$(base64 --wrap=0 "${ci_adb_key}")"
+            gradle --no-daemon connectedDebugAndroidTest \
+              -Pandroid.testInstrumentationRunnerArguments.ciAdbPrivateKey="${ci_adb_private_key}"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
